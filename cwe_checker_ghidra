@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+# simple convenience script to run cwe_checker (https://github.com/fkie-cad/cwe_checker):
+# - download the cwe_checker Ghidra plugin
+# - generate JSON result file to be used with Ghidra
+
+function echo_stderr() {
+	>&2 echo "$1"
+}
+
+function check_argc() {
+	argc=$1
+
+	if [[ $argc -ne 1 ]]
+	then
+		echo_stderr "usage: $0 <binary>"
+		exit 1
+	fi
+}
+
+function check_file_exists() {
+	file_path=$1
+
+	if [[ ! -e $file_path ]]
+	then
+		echo_stderr "file does not exist"
+		exit 1
+	fi
+}
+
+function check_elf_binary() {
+	file_path=$1
+
+	if ! (file $file_path | grep -P "ELF.*Linux") 2>&1 > /dev/null
+	then
+		echo_stderr "provided file not an ELF binary!"
+		exit 1
+	fi
+}
+
+function create_ghidra_scripts_dir {
+	mkdir $HOME/ghidra_scripts 2>/dev/null
+}
+
+function download_plugin {
+	wget -N -q "https://raw.githubusercontent.com/fkie-cad/cwe_checker/master/ghidra_plugin/cwe_checker_ghidra_plugin.py" -O $HOME/ghidra_scripts/cwe_checker_ghidra_plugin.py
+}
+
+function find_container_tool {
+	if which podman 2>&1 > /dev/null
+	then
+		echo "podman"
+	elif which docker 2>&1 > /dev/null
+	then
+		echo "docker"
+	else
+		echo_stderr "you need podman or docker to run cwe_checker!"
+		exit 1
+	fi
+}
+
+function run_cwe_checker() {
+	container_tool=$1
+	file_path=$2
+	binary_name=$(basename "$file_path")
+	full_file_path=$(readlink -f "$file_path")
+
+	"$container_tool" run --rm -v "$full_file_path":/tmp/input:Z fkiecad/cwe_checker bap /tmp/input --pass=cwe-checker --cwe-checker-json --cwe-checker-out=/dev/stdout 2>cwe_checker_errors.log > "${binary_name}_cwe_hits.json"
+}
+
+check_argc $# 
+check_file_exists "$1"
+check_elf_binary "$1"
+create_ghidra_scripts_dir
+download_plugin
+
+container_tool=$(find_container_tool)
+run_cwe_checker "$container_tool" "$1" 
