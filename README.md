@@ -22,7 +22,7 @@ Make sure that `~/.local/bin` is in your `$PATH`!
 cwe_checker_ghidra <some binary>
 ```
 
-Error messages from cwe_checker are saved in `cwe_checker_errors.log`. The JSON result is stored in `<some binary>_cwe_hits.js`
+Error messages from cwe_checker are saved in `cwe_checker_errors.log`. The JSON result is stored in `<some binary>_cwe_hits.json`
 
 ### Use with Ghidra
 
