@@ -8,7 +8,7 @@ This is a simple wrapper script to run cwe_checker (https://github.com/fkie-cad/
 
 ```shell
 cd ~/.local/bin/
-wget TODO
+wget https://raw.githubusercontent.com/martinclauss/cwe_checker_ghidra/master/cwe_checker_ghidra
 chmod +x cwe_checker_ghidra
 ```
 
