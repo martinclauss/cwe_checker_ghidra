@@ -65,7 +65,7 @@ function run_cwe_checker() {
 	binary_name=$(basename "$file_path")
 	full_file_path=$(readlink -f "$file_path")
 
-	"$container_tool" run --rm -v "$full_file_path":/tmp/input:Z fkiecad/cwe_checker bap /tmp/input --pass=cwe-checker --cwe-checker-json --cwe-checker-out=/dev/stdout 2>cwe_checker_errors.log > "${binary_name}_cwe_hits.json"
+	"$container_tool" run --rm -v "$full_file_path":/tmp/input:Z docker.io/fkiecad/cwe_checker /tmp/input --json --out=/dev/stdout 2>cwe_checker_errors.log > "${binary_name}_cwe_hits.json"
 }
 
 check_argc $# 
